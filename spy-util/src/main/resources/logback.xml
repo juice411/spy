@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <jmxConfigurator/>
+  <!-- <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>
+        %d{ISO8601} %-5level [%thread] %logger{0}: %msg%n
+      </pattern>
+    </encoder>
+  </appender> -->
+  
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">			
+			<!-- <pattern>%date %level: [%thread] %class.%method:%line - %msg%n</pattern> -->	
+			<pattern>%date %method:%line - %msg%n</pattern>		
+		</encoder>
+	</appender>
+
+	<appender name="RollingFile_aggregateType"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/home/hadoop/SW/spy/logs/type.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>type.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<maxHistory>7</maxHistory>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>15MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+
+		</rollingPolicy>
+		<encoder>
+			<!-- <pattern>%date %level:[%thread] [%class:%line]- %msg%n</pattern> -->
+			<pattern>%date - %msg%n</pattern>	
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+	
+	<appender name="RollingFile_list"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/home/hadoop/SW/spy/logs/list.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>list.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<maxHistory>7</maxHistory>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>15MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+
+		</rollingPolicy>
+		<encoder>
+			<!-- <pattern>%date %level:[%thread] [%class:%line]- %msg%n</pattern> -->
+			<pattern>%date - %msg%n</pattern>	
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+	
+	<!-- <appender name="DB" class="com.juice.logback.db.MyDBAppender">
+		
+		<connectionSource class="ch.qos.logback.core.db.DataSourceConnectionSource">
+	      <dataSource class="com.mysql.jdbc.jdbc2.optional.MysqlDataSource">
+	        <driverClass>com.mysql.jdbc.Driver</driverClass>
+	        <url>jdbc:mysql://localhost:3306/test</url>
+			<user>root</user>
+			<password>root</password>
+	      </dataSource>
+	    </connectionSource>
+		
+	</appender> -->
+  
+  	
+  	
+	<logger name="aggregateType" level="info" additivity="false">
+		<appender-ref ref="RollingFile_aggregateType"/>
+	</logger>
+	<logger name="getList" level="info" additivity="false">
+		<appender-ref ref="RollingFile_list"/>
+	</logger> 
+	
+	<!-- <logger name="com.juice.stock" level="debug" additivity="false">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+	<logger name="com.juice.util" level="debug" additivity="false">
+		<appender-ref ref="STDOUT"/>
+	</logger> -->
+
+  <root level="debug">
+    <appender-ref ref="STDOUT"/>
+  </root>
+</configuration>

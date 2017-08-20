@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -e
+me=`basename "$0"`
+mydir=`dirname "$0"`
+
+echo $me
+echo $mydir
+spy_home=~/SW/spy
+for jar in "$spy_home"/lib/*.jar; do
+    CLASSPATH="$CLASSPATH:$jar"
+  done
+
+CLASSPATH="${CLASSPATH#:}"
+echo $CLASSPATH
+
+MAINCLASS="MyQuartzJob"
+
+JAVA=${JAVA-'java'}
+
+exec $JAVA -XX:OnOutOfMemoryError="kill -9 %p" -Xmx5G  -server -Xms4g -Xmx4g -XX:MaxDirectMemorySize=1g -XX:PermSize=256m -XX:MaxPermSize=256m -XX:NewSize=1g -XX:MaxNewSize=1g -XX:+UseParNewGC -XX:MaxTenuringThreshold=2 -XX:SurvivorRatio=8 -XX:+UnlockDiagnosticVMOptions -XX:ParGCCardsPerStrideChunk=32768 -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled  -XX:+ParallelRefProcEnabled -XX:+CMSClassUnloadingEnabled  -XX:CMSInitiatingOccupancyFraction=80 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime -XX:-OmitStackTraceInFastThrow -Xloggc:$spy/logs/spy.gc  -classpath "$CLASSPATH" com.juice.stock.core.$MAINCLASS "$@" &
