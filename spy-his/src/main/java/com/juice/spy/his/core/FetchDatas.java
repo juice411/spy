@@ -112,7 +112,7 @@ public class FetchDatas {
                     LOG.error("-----------------{}----------------", e.getMessage());
                 }
             }
-        }, 1000, 5000, TimeUnit.MILLISECONDS);
+        }, 2000, 5000, TimeUnit.MILLISECONDS);
         exec.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -128,7 +128,7 @@ public class FetchDatas {
                     LOG.error("-----------------{}----------------", e.getMessage());
                 }
             }
-        }, 1000, 5000, TimeUnit.MILLISECONDS);
+        }, 3000, 5000, TimeUnit.MILLISECONDS);
 
         LOG.info("正在抓取上一个股票交易日的历史数据！");
     }
