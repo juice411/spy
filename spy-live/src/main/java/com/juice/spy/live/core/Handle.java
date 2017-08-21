@@ -13,7 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Handle {
     private static final Logger LOG = LoggerFactory.getLogger(Handle.class);
@@ -22,23 +28,22 @@ public class Handle {
     private static final Charset CHARSET = Charset.forName("ISO-8859-1");//不支持中文
 
 
-    public static void handle() {
+    public static void handle(Stock stock) {
 
-        for (Stock stock : Stocks.getStocks()) {
             String live = HttpTookit.doGet(url_live_qq.replace("#", stock.getCode()), null, "gbk", true);
             LOG.debug(live);
             //解析实时
             if (StringUtils.isNotBlank(live) && !live.startsWith("v_pv_none_match")) {
                 String[] live_stock = live.split("~");
                 if (StringUtils.isNotBlank(live_stock[8])) {//股票状态，比如S,D等
-                    continue;
+                    return;
                 }
 
                 //读出昨天的历史数据与当前实时值做算法
                 Calendar c = Holiday.getNextWorkDay(Calendar.getInstance(),-1);
                 //这是获取当前是当年的第几天
                 byte[] qualifier = (c.get(Calendar.DAY_OF_YEAR) + "").getBytes(CHARSET);
-                //byte[] qualifier = "229".getBytes(CHARSET);
+                //byte[] qualifier = "230".getBytes(CHARSET);
                 GetRequest get = new GetRequest("stock-his".getBytes(CHARSET), stock.getCode().getBytes(CHARSET), "t".getBytes(CHARSET),qualifier);
                 KeyValue kv=null;
                 try {
@@ -69,57 +74,61 @@ public class Handle {
 
             }
 
-        }
+    }
 
+    static class SyncTask implements Runnable {
+        private Stock stock;
+        public SyncTask(Stock stock){
+            this.stock=stock;
+        }
+        @Override
+        public void run() {
+            handle(stock);
+        }
     }
 
 
     public static void main(String[] args) {
-        handle();
 
-        /*ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
-        exec.scheduleAtFixedRate(new Runnable() {//每隔一段时间就触发异常
-            @Override
-            public void run() {
+        Calendar cal = Calendar.getInstance();
+        cal.getTime();
 
-                try {
+        ThreadPoolExecutor executor=executor = new ThreadPoolExecutor(10, 50, 10000, TimeUnit.MILLISECONDS,new ArrayBlockingQueue<Runnable>(100));
+        while (true){
+            try {
+                if (!Holiday.checkHoliday(cal)) {
+                    final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                    Date curr = sdf.parse(sdf.format(new Date()));
+                    Date d1 = sdf.parse("09:19:50");
+                    Date d2 = sdf.parse("11:30:30");
+                    Date d3 = sdf.parse("12:59:50");
+                    Date d4 = sdf.parse("15:00:30");
 
-                    Calendar cal = Calendar.getInstance();
-                    cal.getTime();
-
-                    if (!Holiday.checkHoliday(cal)) {
-                        final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-                        Date curr = sdf.parse(sdf.format(new Date()));
-                        Date d1 = sdf.parse("09:19:50");
-                        Date d2 = sdf.parse("11:30:30");
-                        Date d3 = sdf.parse("12:59:50");
-                        Date d4 = sdf.parse("15:00:30");
-
-                        if ((curr.after(d1) && curr.before(d2)) || (curr.after(d3) && curr.before(d4))) {
-                            try {
-
-                                handle();
-
-                            } catch (Exception e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                                LOG.error("-----------------{}----------------", e.getMessage());
+                    if ((curr.after(d1) && curr.before(d2)) || (curr.after(d3) && curr.before(d4))) {
+                        try {
+                            for (Stock stock : Stocks.getStocks()) {
+                                SyncTask syncTask=new SyncTask(stock);
+                                executor.execute(syncTask);
+                                LOG.debug("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
                             }
+
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            LOG.error("-----------------{}----------------", e.getMessage());
                         }
                     }
-
-
-
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    LOG.error("-----------------{}----------------", e.getMessage());
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }, 1000, 5000, TimeUnit.MILLISECONDS);
+            try {
+                Thread.sleep(5000);
 
-        LOG.info("实时处理已启动！");*/
-
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

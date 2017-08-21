@@ -85,7 +85,7 @@ public class FetchDatas {
                 try {
 
                     fetchHis(st.pop());
-                    LOG.info("还剩余{}条待抓取",st.size());
+                    LOG.info("还剩余{}条待抓取,当前抓取到{}",st.size(),st.get(0));
 
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
@@ -101,7 +101,7 @@ public class FetchDatas {
                 try {
 
                     fetchHis(st.pop());
-                    LOG.info("还剩余{}条待抓取",st.size());
+                    LOG.info("还剩余{}条待抓取,当前抓取到{}",st.size(),st.get(0));
 
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
@@ -117,7 +117,7 @@ public class FetchDatas {
                 try {
 
                     fetchHis(st.pop());
-                    LOG.info("还剩余{}条待抓取",st.size());
+                    LOG.info("还剩余{}条待抓取,当前抓取到{}",st.size(),st.get(0));
 
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
