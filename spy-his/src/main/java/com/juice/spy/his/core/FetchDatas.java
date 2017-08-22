@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Stack;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,15 +71,36 @@ public class FetchDatas {
 
     }
 
+    static class SyncTask implements Runnable {
+        private Stock stock;
+        public SyncTask(Stock stock){
+            this.stock=stock;
+        }
+        @Override
+        public void run() {
+            fetchHis(stock);
+        }
+    }
+
     public static void main(String[] args) {
 
         final Stack<Stock> st = new Stack();
         st.addAll(Stocks.getStocks());
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 50, 10000, TimeUnit.MILLISECONDS,new ArrayBlockingQueue<Runnable>(100));
+        while (st.size()>0){
+            Stock stock=st.pop();
+            executor.execute(new SyncTask(stock));
+            LOG.debug("即将抓取{},{}",stock.getCode(),stock.getName());
+            try {
+                Thread.sleep(1000);
+                LOG.debug("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
 
-        /*Calendar c=Calendar.getInstance();
-        c.add(5,-3);*/
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
-        ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(5);
+        /*ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(5);
         exec.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -93,41 +116,9 @@ public class FetchDatas {
                     LOG.error("-----------------{}----------------", e.getMessage());
                 }
             }
-        }, 1000, 5000, TimeUnit.MILLISECONDS);
-        exec.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
+        }, 1000, 5000, TimeUnit.MILLISECONDS);*/
 
-                try {
 
-                    fetchHis(st.pop());
-                    LOG.info("还剩余{}条待抓取,当前抓取到{}",st.size(),st.get(0));
-
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    LOG.error("-----------------{}----------------", e.getMessage());
-                }
-            }
-        }, 2000, 5000, TimeUnit.MILLISECONDS);
-        exec.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-
-                    fetchHis(st.pop());
-                    LOG.info("还剩余{}条待抓取,当前抓取到{}",st.size(),st.get(0));
-
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    LOG.error("-----------------{}----------------", e.getMessage());
-                }
-            }
-        }, 3000, 5000, TimeUnit.MILLISECONDS);
-
-        LOG.info("正在抓取上一个股票交易日的历史数据！");
     }
 
 }
