@@ -91,9 +91,10 @@ public class FetchDatas {
             Stock stock=st.pop();
             executor.execute(new SyncTask(stock));
             LOG.debug("即将抓取{},{}",stock.getCode(),stock.getName());
+            LOG.debug("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
             try {
-                Thread.sleep(1000);
-                LOG.debug("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
+                Thread.sleep(500);
+
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
