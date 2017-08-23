@@ -102,7 +102,7 @@ public class Handle {
                     Date d1 = sdf.parse("09:19:50");
                     Date d2 = sdf.parse("11:30:30");
                     Date d3 = sdf.parse("12:59:50");
-                    Date d4 = sdf.parse("16:00:30");
+                    Date d4 = sdf.parse("15:00:30");
 
                     if ((curr.after(d1) && curr.before(d2)) || (curr.after(d3) && curr.before(d4))) {
                         try {
@@ -110,7 +110,7 @@ public class Handle {
                                 SyncTask syncTask=new SyncTask(stock);
                                 executor.execute(syncTask);
                                 try {
-                                    Thread.sleep(3000);
+                                    Thread.sleep(1000);
 
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();

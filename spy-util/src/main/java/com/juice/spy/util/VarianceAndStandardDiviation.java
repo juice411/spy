@@ -21,9 +21,9 @@ public class VarianceAndStandardDiviation {
         //设置doubl字符串输出格式，不以科学计数法输出
         DecimalFormat df=new DecimalFormat("#,##0.00");//格式化设置
         x=new double[3];
-        x[0]=18017.85;
-        x[1]=19536.06;
-        x[2]=26393.01;
+        x[0]=59800;
+        x[1]=72500;
+        x[2]=94500;
         //计算方差
         double dV=Variance(x);
         System.out.println("方差="+df.format(dV));
