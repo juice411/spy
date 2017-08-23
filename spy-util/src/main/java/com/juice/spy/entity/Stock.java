@@ -29,5 +29,17 @@ public class Stock {
         this.type = type;
     }
 
+    @Override
+    public int hashCode() {
+        return code.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this.getClass() == obj.getClass()){
+            return code.equals(((Stock)obj).code);
+        }
+        return false;
+    }
 
 }

@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -83,15 +85,26 @@ public class FetchDatas {
     }
 
     public static void main(String[] args) {
+        List<Stock> subList=new ArrayList<Stock>();
+        for(int i=0;i<Stocks.getStocks().size();i++){
+            if(Stocks.getStocks().get(i).getCode().equalsIgnoreCase("sz000628")){
+                subList=Stocks.getStocks().subList(i,Stocks.getStocks().size());
+            }
+        }
 
         final Stack<Stock> st = new Stack();
-        st.addAll(Stocks.getStocks());
+        if(subList.size()>0){
+            st.addAll(subList);
+        }else {
+            st.addAll(Stocks.getStocks());
+        }
+
         ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 50, 10000, TimeUnit.MILLISECONDS,new ArrayBlockingQueue<Runnable>(100));
         while (st.size()>0){
             Stock stock=st.pop();
             executor.execute(new SyncTask(stock));
-            LOG.debug("即将抓取{},{}",stock.getCode(),stock.getName());
-            LOG.debug("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
+            LOG.info("即将抓取{},{}",stock.getCode(),stock.getName());
+            LOG.info("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
             try {
                 Thread.sleep(500);
 

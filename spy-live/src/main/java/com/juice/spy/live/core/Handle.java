@@ -3,12 +3,14 @@ package com.juice.spy.live.core;
 
 import com.juice.spy.entity.Stock;
 import com.juice.spy.statics.Stocks;
+import com.juice.spy.util.DateUtil;
 import com.juice.spy.util.Holiday;
 import com.juice.spy.util.HttpTookit;
 import com.juice.spy.util.VarianceAndStandardDiviation;
 import org.apache.commons.lang.StringUtils;
 import org.hbase.async.GetRequest;
 import org.hbase.async.KeyValue;
+import org.hbase.async.PutRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,33 @@ public class Handle {
     private static String url_live_qq = "http://qt.gtimg.cn/q=s_#";
 
     private static final Charset CHARSET = Charset.forName("ISO-8859-1");//不支持中文
+
+    private static final Calendar CALENDAR_9=Calendar.getInstance();
+    private static final Calendar CALENDAR_10=Calendar.getInstance();
+    private static final Calendar CALENDAR_11=Calendar.getInstance();
+    private static final Calendar CALENDAR_13=Calendar.getInstance();
+    private static final Calendar CALENDAR_14=Calendar.getInstance();
+    private static final Calendar CALENDAR_15=Calendar.getInstance();
+
+    static {
+        CALENDAR_9.set(Calendar.HOUR_OF_DAY,9);
+        CALENDAR_9.set(Calendar.MINUTE,30);
+
+        CALENDAR_10.set(Calendar.HOUR_OF_DAY,10);
+        CALENDAR_10.set(Calendar.MINUTE,30);
+
+        CALENDAR_11.set(Calendar.HOUR_OF_DAY,11);
+        CALENDAR_11.set(Calendar.MINUTE,30);
+
+        CALENDAR_13.set(Calendar.HOUR_OF_DAY,13);
+        CALENDAR_13.set(Calendar.MINUTE,0);
+
+        CALENDAR_14.set(Calendar.HOUR_OF_DAY,14);
+        CALENDAR_14.set(Calendar.MINUTE,0);
+
+        CALENDAR_15.set(Calendar.HOUR_OF_DAY,15);
+        CALENDAR_15.set(Calendar.MINUTE,0);
+    }
 
 
     public static void handle(Stock stock) {
@@ -66,8 +95,40 @@ public class Handle {
                     standard/=10000;//以万手作为单位
                     if(standard<3){//说明3条均量线交织在一起
                         //此时判断实时量能是否有效放大
-                        if((Double.valueOf(live_stock[6])-vma[0])/vma[0]>=1.5){
-                            LOG.debug("stock:{},{}量能异动",live_stock[1],live_stock[2]);
+                        double rate_v=(Double.valueOf(live_stock[6])-vma[0])/vma[0];
+                        Calendar cal_cur=Calendar.getInstance();
+                        if(cal_cur.after(CALENDAR_15)){//适用于盘后
+                            if(rate_v>=2){
+                                LOG.info("stock:{},{},rate_v={},量能突破",live_stock[1],live_stock[2],rate_v);
+                                PutRequest put = new PutRequest("stock".getBytes(CHARSET), stock.getCode().getBytes(CHARSET), "t".getBytes(CHARSET), "type".getBytes(CHARSET), ("2,"+rate_v).getBytes(CHARSET));
+                                Stocks.getHclient().put(put);
+                            }
+
+                        }else if(cal_cur.after(CALENDAR_9)&&cal_cur.before(CALENDAR_10)){
+                            if(rate_v>=0.3){
+                                LOG.info("stock:{},{},rate_v={},量能异动",live_stock[1],live_stock[2],rate_v);
+                                PutRequest put = new PutRequest("stock".getBytes(CHARSET), stock.getCode().getBytes(CHARSET), "t".getBytes(CHARSET), "type".getBytes(CHARSET), ("1,"+rate_v).getBytes(CHARSET));
+                                Stocks.getHclient().put(put);
+                            }
+
+                        }else if(cal_cur.after(CALENDAR_10)&&cal_cur.before(CALENDAR_11)){
+                            if(rate_v>=0.7){
+                                LOG.info("stock:{},{},rate_v={},量能异动",live_stock[1],live_stock[2],rate_v);
+                                PutRequest put = new PutRequest("stock".getBytes(CHARSET), stock.getCode().getBytes(CHARSET), "t".getBytes(CHARSET), "type".getBytes(CHARSET), ("1,"+rate_v).getBytes(CHARSET));
+                                Stocks.getHclient().put(put);
+                            }
+                        }else if(cal_cur.after(CALENDAR_13)&&cal_cur.before(CALENDAR_14)){
+                            if(rate_v>=1){
+                                LOG.info("stock:{},{},rate_v={},量能异动",live_stock[1],live_stock[2],rate_v);
+                                PutRequest put = new PutRequest("stock".getBytes(CHARSET), stock.getCode().getBytes(CHARSET), "t".getBytes(CHARSET), "type".getBytes(CHARSET), ("1,"+rate_v).getBytes(CHARSET));
+                                Stocks.getHclient().put(put);
+                            }
+                        }else if(cal_cur.after(CALENDAR_14)&&cal_cur.before(CALENDAR_15)){
+                            if(rate_v>=1.5){
+                                LOG.info("stock:{},{},rate_v={},量能异动",live_stock[1],live_stock[2],rate_v);
+                                PutRequest put = new PutRequest("stock".getBytes(CHARSET), stock.getCode().getBytes(CHARSET), "t".getBytes(CHARSET), "type".getBytes(CHARSET), ("1,"+rate_v).getBytes(CHARSET));
+                                Stocks.getHclient().put(put);
+                            }
                         }
                     }
                 }
@@ -115,7 +176,7 @@ public class Handle {
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-                                LOG.debug("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
+                                LOG.info("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
                             }
 
                         } catch (Exception e) {

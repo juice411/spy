@@ -37,7 +37,7 @@
 	
 	<appender name="RollingFile_list"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>/home/hadoop/SW/spy/logs/list.log</file>
+		<file>/home/hadoop/SW/spy/logs/his.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>list.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
@@ -83,7 +83,7 @@
 		<appender-ref ref="STDOUT"/>
 	</logger> -->
 
-  <root level="debug">
+  <root level="info">
     <appender-ref ref="STDOUT"/>
   </root>
 </configuration>
