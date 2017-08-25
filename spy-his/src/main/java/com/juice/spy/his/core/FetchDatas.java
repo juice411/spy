@@ -86,11 +86,11 @@ public class FetchDatas {
 
     public static void main(String[] args) {
         List<Stock> subList=new ArrayList<Stock>();
-        for(int i=0;i<Stocks.getStocks().size();i++){
+        /*for(int i=0;i<Stocks.getStocks().size();i++){
             if(Stocks.getStocks().get(i).getCode().equalsIgnoreCase("sz000628")){
                 subList=Stocks.getStocks().subList(i,Stocks.getStocks().size());
             }
-        }
+        }*/
 
         final Stack<Stock> st = new Stack();
         if(subList.size()>0){

@@ -3,7 +3,6 @@ package com.juice.spy.live.core;
 
 import com.juice.spy.entity.Stock;
 import com.juice.spy.statics.Stocks;
-import com.juice.spy.util.DateUtil;
 import com.juice.spy.util.Holiday;
 import com.juice.spy.util.HttpTookit;
 import com.juice.spy.util.VarianceAndStandardDiviation;
@@ -19,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -79,7 +77,7 @@ public class Handle {
                     kv= Stocks.getHclient().get(get).joinUninterruptibly(5000).get(0);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.error("没有找到上次交易历史数据{}，{}",stock.getCode(),stock.getName());
                 }
 
                 String[] his=new String(kv.value(),CHARSET).split(",");
@@ -160,18 +158,18 @@ public class Handle {
                 if (!Holiday.checkHoliday(cal)) {
                     final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                     Date curr = sdf.parse(sdf.format(new Date()));
-                    Date d1 = sdf.parse("09:19:50");
+                    Date d1 = sdf.parse("09:24:50");
                     Date d2 = sdf.parse("11:30:30");
                     Date d3 = sdf.parse("12:59:50");
                     Date d4 = sdf.parse("15:00:30");
 
-                    if ((curr.after(d1) && curr.before(d2)) || (curr.after(d3) && curr.before(d4))) {
-                        try {
-                            for (Stock stock : Stocks.getStocks()) {
+                    try {
+                        for (Stock stock : Stocks.getStocks()) {
+                            if ((curr.after(d1) && curr.before(d2)) || (curr.after(d3) && curr.before(d4))) {
                                 SyncTask syncTask=new SyncTask(stock);
                                 executor.execute(syncTask);
                                 try {
-                                    Thread.sleep(1000);
+                                    Thread.sleep(900);
 
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -179,12 +177,15 @@ public class Handle {
                                 LOG.info("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+executor.getQueue().size()+"，finished："+executor.getCompletedTaskCount());
                             }
 
-                        } catch (Exception e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                            LOG.error("-----------------{}----------------", e.getMessage());
                         }
+
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        LOG.error("-----------------{}----------------", e.getMessage());
                     }
+
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();

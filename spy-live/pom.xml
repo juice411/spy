@@ -26,7 +26,7 @@
     <dependencies>
         <dependency>
             <groupId>com.juice.spy</groupId>
-            <artifactId>spy-util</artifactId>
+            <artifactId>spy-his</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
