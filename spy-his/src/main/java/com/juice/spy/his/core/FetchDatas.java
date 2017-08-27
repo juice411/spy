@@ -99,7 +99,7 @@ public class FetchDatas {
             st.addAll(Stocks.getStocks());
         }
 
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 50, 10000, TimeUnit.MILLISECONDS,new ArrayBlockingQueue<Runnable>(100));
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(5, 10, 10000, TimeUnit.MILLISECONDS,new ArrayBlockingQueue<Runnable>(100));
         while (st.size()>0){
             Stock stock=st.pop();
             executor.execute(new SyncTask(stock));

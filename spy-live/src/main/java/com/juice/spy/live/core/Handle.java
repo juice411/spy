@@ -2,6 +2,7 @@ package com.juice.spy.live.core;
 
 
 import com.juice.spy.entity.Stock;
+import com.juice.spy.his.core.FetchDatas;
 import com.juice.spy.statics.Stocks;
 import com.juice.spy.util.Holiday;
 import com.juice.spy.util.HttpTookit;
@@ -77,7 +78,8 @@ public class Handle {
                     kv= Stocks.getHclient().get(get).joinUninterruptibly(5000).get(0);
 
                 } catch (Exception e) {
-                    LOG.error("没有找到上次交易历史数据{}，{}",stock.getCode(),stock.getName());
+                    FetchDatas.fetchHis(stock);
+                    LOG.error("重新抓取上一次历史交易数据{}，{}",stock.getCode(),stock.getName());
                 }
 
                 String[] his=new String(kv.value(),CHARSET).split(",");
@@ -150,8 +152,6 @@ public class Handle {
     public static void main(String[] args) {
 
         Calendar cal = Calendar.getInstance();
-        cal.getTime();
-
         ThreadPoolExecutor executor=executor = new ThreadPoolExecutor(10, 50, 10000, TimeUnit.MILLISECONDS,new ArrayBlockingQueue<Runnable>(100));
         while (true){
             try {
